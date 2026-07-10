@@ -1,0 +1,27 @@
+- name: 安装Node.js
+  uses: actions/setup-node@v3
+  with:
+    node-version: '20'
+
+- name: 缓存依赖
+  uses: actions/cache@v3
+  with:
+    path: ~/.npm
+    key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+
+- name: 安装依赖
+  run: npm install
+
+- name: 生成静态文件
+  run: npx hexo generate
+
+- name: 创建.nojekyll文件
+  run: echo "" > public/.nojekyll
+
+- name: 部署到GitHub Pages
+  uses: peaceiris/actions-gh-pages@v3
+  with:
+    personal_token: ${{ secrets.PERSONAL_TOKEN }}
+    publish_dir: ./public
+    publish_branch: main
+    external_repository: cwassb123/cwassb123.github.io
