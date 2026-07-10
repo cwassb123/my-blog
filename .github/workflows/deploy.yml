@@ -1,27 +1,35 @@
-- name: 安装Node.js
-  uses: actions/setup-node@v3
-  with:
-    node-version: '20'
+name: Deploy Hexo to GitHub Pages
 
-- name: 缓存依赖
-  uses: actions/cache@v3
-  with:
-    path: ~/.npm
-    key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+on:
+  push:
+    branches:
+      - main
 
-- name: 安装依赖
-  run: npm install
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
 
-- name: 生成静态文件
-  run: npx hexo generate
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
 
-- name: 创建.nojekyll文件
-  run: echo "" > public/.nojekyll
+      - name: Install Dependencies
+        run: npm install
 
-- name: 部署到GitHub Pages
-  uses: peaceiris/actions-gh-pages@v3
-  with:
-    personal_token: ${{ secrets.PERSONAL_TOKEN }}
-    publish_dir: ./public
-    publish_branch: main
-    external_repository: cwassb123/cwassb123.github.io
+      - name: Build
+        run: npm run build
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          personal_token: ${{ secrets.PERSONAL_TOKEN }}
+          publish_dir: ./public
+          # 如果你想发布到 cwassb123.github.io 这个仓库，请保留下面这行，并确保下面的仓库名正确：
+          external_repository: cwassb123/cwassb123.github.io
+          publish_branch: main
