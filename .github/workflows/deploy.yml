@@ -14,10 +14,15 @@ jobs:
         with:
           submodules: false
 
+      # 关键：指定 Node.js 18 版本。高版本 Node 导致 ESM 兼容性问题，用 18 能完美避开！
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
+
+      # 致命一击：在安装前强制删除旧的 node_modules，彻底碾碎之前的缓存冲突
+      - name: Clean old dependencies
+        run: rm -rf node_modules
 
       - name: Install Dependencies
         run: npm install
@@ -25,11 +30,11 @@ jobs:
       - name: Build
         run: npm run build
 
+      # 部署到外部仓库 (你的 GitHub Pages 仓库)
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
           personal_token: ${{ secrets.PERSONAL_TOKEN }}
-          publish_dir: ./public
-          # 如果你想发布到 cwassb123.github.io 这个仓库，请保留下面这行，并确保下面的仓库名正确：
           external_repository: cwassb123/cwassb123.github.io
           publish_branch: main
+          publish_dir: ./public
